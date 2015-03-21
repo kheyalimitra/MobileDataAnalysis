@@ -27,6 +27,7 @@ import javax.net.ssl.X509TrustManager;
 /**
  * Created by KheyaliMitra on 2/24/2015.
  */
+/// Added to GITHUB
 public class CallService {
     final static HostnameVerifier DO_NOT_VERIFY = new HostnameVerifier() {
         public boolean verify(String hostname, SSLSession session) {
