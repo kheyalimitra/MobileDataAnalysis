@@ -28,6 +28,7 @@ import javax.net.ssl.X509TrustManager;
  * Created by KheyaliMitra on 2/24/2015.
  */
 /// Added to GITHUB
+
 public class CallService {
     final static HostnameVerifier DO_NOT_VERIFY = new HostnameVerifier() {
         public boolean verify(String hostname, SSLSession session) {
@@ -41,7 +42,7 @@ public class CallService {
     public  final String OPERATION_NAME_Measure = "Measures";
     public  final String WSDL_TARGET_NAMESPACE ="http://tempuri.org/";
     public  final String SOAP_ADDRESS ="http://webolap.cmpt.sfu.ca/ElaWebService/Service.asmx";
-
+///////////////////////////////////////////////////////////////////
     public CallService()
     {
 
