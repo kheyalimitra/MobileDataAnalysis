@@ -1,7 +1,7 @@
 package com.example.kheyalimitra.mywebserviceapi;
 
+import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.Service;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.view.Menu;
@@ -9,7 +9,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.app.Activity;
 import android.widget.ExpandableListView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -24,15 +23,12 @@ import java.util.Map;
 
 public class MainActivity  extends Activity{
 
-    //Top level names of Domain
-    List<String> groupList;
-
     //Child hiearchy
     public Map<String, List<String>> AdventureWorksDomainDetails;
-
     //Measure details
-    public ArrayList<String> AdventureWorksMeasureDetails ;
-
+    public ArrayList<String> AdventureWorksMeasureDetails;
+    //Top level names of Domain
+    List<String> groupList;
     //List view object
     ExpandableListView expListView;
 
@@ -46,9 +42,6 @@ public class MainActivity  extends Activity{
         final AlertDialog ad = new AlertDialog.Builder(this).create();
         final ExpandableListAdapter expListAdapter = new ExpandableListAdapter(this);
         final Activity activityObj = this;
-        //PopulateDetails details =  new PopulateDetails();
-
-        //details.BindButtonClick(btn, expListAdapter, activityObj);
 
         btn.setOnClickListener(new View.OnClickListener() {
 

@@ -2,6 +2,7 @@ package com.example.kheyalimitra.mywebserviceapi;
 
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -25,24 +26,38 @@ public class ParseJSONResponse {
      * @throws ParseException
      */
     public Map<String,List<String>>ParseDomainRecords(String domains) throws ParseException {
+        //domain details hashmap instantiate
         AdventureWorksDomainDetails = new LinkedHashMap<String, List<String>>();
+        //New JSON parser library
         JSONParser parser=new JSONParser();
+
+        //Parse Domain string to get JSON object
         Object obj=parser.parse(domains);
+
+        //Cast JSON object to HashMap
         HashMap<String,Object> domainDetails = (HashMap<String,Object>)obj;
         Iterator it = domainDetails.entrySet().iterator();
+        //iterates all top level elements
         while (it.hasNext()) {
             HashMap.Entry pair = (HashMap.Entry)it.next();
             List<String> childrenList=  new ArrayList<String>();
-            HashMap<String,Object> innerchild = (HashMap<String,Object>)pair.getValue();
-            Iterator inner = innerchild.entrySet().iterator();
+
+            //get HashMap object for inner child
+            HashMap<String, Object> innerChild = (HashMap<String, Object>) pair.getValue();
+            Iterator inner = innerChild.entrySet().iterator();
             while(inner.hasNext())
             {
+                //get the child element
                 HashMap.Entry child = (HashMap.Entry)inner.next();
-                String []value = child.getValue().toString().substring(1,child.getValue().toString().length()-2).split(",");
+                //get child string value
+                String childString = child.getValue().toString();
+                String[] value = childString.substring(1, childString.length() - 2).split(",");
                 childrenList.add(child.getKey().toString());
 
             }
-            AdventureWorksDomainDetails.put(pair.getKey().toString(),childrenList);
+
+            //Add new child node to string list data structure
+            AdventureWorksDomainDetails.put(pair.getKey().toString(), childrenList);
             inner.remove();
             it.remove();
         }
@@ -56,10 +71,10 @@ public class ParseJSONResponse {
      */
     public ArrayList<String> ParseMeasureResponse(String measures) {
         AdventureWorksMeasureDetails =  new ArrayList<String>();
-        String commaseparations[] = measures.trim().split(",");
-        for (int i=0;i<commaseparations.length;i++)
+        String commaSeparations[] = measures.trim().split(",");
+        for (int i = 0; i < commaSeparations.length; i++)
         {
-            String splits[]= commaseparations[i].split("0");
+            String splits[] = commaSeparations[i].split("0");
             AdventureWorksMeasureDetails.add(splits[1].replace("|","").replace("\"","").replace("]",""));
         }
         return  AdventureWorksMeasureDetails;
