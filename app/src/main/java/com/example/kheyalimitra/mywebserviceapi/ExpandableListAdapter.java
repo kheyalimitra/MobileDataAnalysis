@@ -51,7 +51,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
             convertView = inflater.inflate(R.layout.child_items, null);
         }
 
-        TextView item = (TextView) convertView.findViewById(R.id.laptop);
+        TextView item = (TextView) convertView.findViewById(R.id.DomainHierarchy);
 
         ImageView delete = (ImageView) convertView.findViewById(R.id.delete);
         delete.setOnClickListener(new View.OnClickListener() {
@@ -109,7 +109,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
             convertView = infalInflater.inflate(R.layout.group_items,
                     null);
         }
-        TextView item = (TextView) convertView.findViewById(R.id.laptop);
+        TextView item = (TextView) convertView.findViewById(R.id.DomainHierarchy);
         item.setTypeface(null, Typeface.BOLD);
         item.setText(laptopName);
         return convertView;

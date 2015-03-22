@@ -3,6 +3,7 @@ package com.example.kheyalimitra.mywebserviceapi;
 import android.app.AlertDialog;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
+import android.util.JsonReader;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -12,13 +13,24 @@ import android.widget.ExpandableListView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import org.json.JSONArray;
 import org.json.JSONObject;
+import org.json.simple.parser.*;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+
 import android.app.Activity;
+
 
 
 public class MainActivity extends Activity {
@@ -63,9 +75,44 @@ public class MainActivity extends Activity {
                         groupList = new ArrayList<String>();
                         AdventureWorksMeasureDetails =  new ArrayList<String>();
                        ArrayList<String> animalsNameList = new ArrayList<String>();
+                       ///////////////////////////////////////////////////////////
+                        InputStream stream = new ByteArrayInputStream(domains.trim().getBytes());
+                        JsonReader reader = new JsonReader(new InputStreamReader(stream, "UTF-8"));
+                        JSONParser parser=new JSONParser();
+                        Object obj=parser.parse(domains);
+                        HashMap<String,Object> domainDetails = (HashMap<String,Object>)obj;
+
+                        Iterator it = domainDetails.entrySet().iterator();
+                        while (it.hasNext()) {
+                            HashMap.Entry pair = (HashMap.Entry)it.next();
+                            groupList.add(pair.getKey().toString());
+                            List<String> childrenList=  new ArrayList<String>();
+                            HashMap<String,Object> innerchild = (HashMap<String,Object>)pair.getValue();
+                            Iterator inner = innerchild.entrySet().iterator();
+                            while(inner.hasNext())
+                            {
+                                HashMap.Entry child = (HashMap.Entry)inner.next();
+                                String []value = child.getValue().toString().substring(1,child.getValue().toString().length()-2).split(",");
+
+
+                                childrenList.add(child.getKey().toString());
+
+                            }
+                            AdventureWorksDomainDetails.put(pair.getKey().toString(),childrenList);
+                            inner.remove();
+                            it.remove();
+                        }
+                        /*try {
+                            readMessage(reader);
+                        }
+                        finally {
+                            reader.close();
+                        }
+                       ////////////////////////////////////////////////////
                         JSONObject jObject  ;
                         jObject = new JSONObject(domains.trim());
                         Iterator<?> keys = jObject.keys();
+
                         while( keys.hasNext() )
                         {
                                  String key = (String)keys.next();
@@ -86,7 +133,7 @@ public class MainActivity extends Activity {
                                      createCollection(key,children);
                                  }
 
-                        }
+                        }*/
                         String commaseparations[] = measures.trim().split(",");
                         for (int i=0;i<commaseparations.length;i++)
                             {
@@ -158,6 +205,39 @@ public class MainActivity extends Activity {
                   //  btn.setVisibility(View.INVISIBLE);
     }
 
+   /* private List readMessagesArray(JsonReader reader) throws IOException{
+        List messages = new ArrayList();
+
+        reader.beginObject();
+        while (reader.hasNext()) {
+
+            messages.add(readMessage(reader));
+        }
+        reader.endArray();
+        return messages;
+    }*/
+    public void readMessage(JsonReader reader) throws IOException {
+        reader.beginObject();
+        while (reader.hasNext()) {
+            String name = reader.nextName();
+            groupList.add(name);
+            readHierarchy(name,reader);
+        }
+        reader.endObject();
+        //return new Message();
+    }
+    public void readHierarchy(String key,JsonReader reader) throws IOException {
+        List<String> children =  new ArrayList<String>();
+        reader.beginObject();
+        while (reader.hasNext()) {
+            String name = reader.nextName();
+            children.add(name);
+        }
+        if(children.size()>0)
+            createCollection(key,children);
+        reader.endObject();
+       // return new User(username, followersCount);
+    }
 
     private void createCollection(String key, List<String> children) {
         // preparing laptops collection(child)
