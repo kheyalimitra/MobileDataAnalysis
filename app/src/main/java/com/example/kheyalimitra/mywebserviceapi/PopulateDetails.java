@@ -1,55 +1,78 @@
 package com.example.kheyalimitra.mywebserviceapi;
-
-import android.app.AlertDialog;
-import android.app.Service;
-import android.os.Bundle;
+import android.app.Activity;
 import android.util.DisplayMetrics;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.app.Activity;
 import android.widget.ExpandableListView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
-
-public class MainActivity  extends Activity{
-
+/**
+ * Created by KheyaliMitra on 3/22/2015.
+ */
+public class PopulateDetails extends Activity {
+    private static String _domains;
+    private static String _measures;
     //Top level names of Domain
     List<String> groupList;
 
     //Child hiearchy
-    public Map<String, List<String>> AdventureWorksDomainDetails;
+   public Map<String, List<String>> AdventureWorksDomainDetails;
 
-    //Measure details
-    public ArrayList<String> AdventureWorksMeasureDetails ;
+    //Measure MainActivity
+   public ArrayList<String> AdventureWorksMeasureDetails ;
 
     //List view object
     ExpandableListView expListView;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        final Button btn = (Button) findViewById(R.id.getbtn);
-        ///Display data in Text view and List View
+    /**
+     * Set Domain strings
+     * @param Domains
+     */
+    public static void set_domains(String Domains) {
+        PopulateDetails._domains = Domains;
+    }
 
-        final AlertDialog ad = new AlertDialog.Builder(this).create();
-        final ExpandableListAdapter expListAdapter = new ExpandableListAdapter(this);
-        final Activity activityObj = this;
-        //PopulateDetails details =  new PopulateDetails();
+    /**
+     * Set measures string
+     * @param Measures
+     */
+    public static void set_measures(String Measures) {
+        PopulateDetails._measures = Measures;
+    }
 
-        //details.BindButtonClick(btn, expListAdapter, activityObj);
+    /**
+     * Get Domains name
+     * @return
+     */
+    public String get_domains() {
+        return _domains;
+    }
 
+    /**
+     * Get measures
+     * @return
+     */
+    public String get_measures() {
+        return _measures;
+    }
+
+
+
+    /**
+     * populates domains and measures from web service response coming as JSON Object
+     * @param btn
+     * @param expListAdapter
+     * @param activityObj
+     */
+    public void BindButtonClick(final Button btn, final ExpandableListAdapter expListAdapter, final Activity activityObj) {
+        ///Event listner for get domain and measure details button
         btn.setOnClickListener(new View.OnClickListener() {
 
                                    /**
@@ -58,24 +81,24 @@ public class MainActivity  extends Activity{
                                    @Override
                                    public void onClick(View arg0) {
 
-                                       try {
-                                           ParseJSONResponse parse = new ParseJSONResponse();
+                                       try{
+                                           ParseJSONResponse parse =  new ParseJSONResponse();
                                            _startServiceThread();
-                                           AdventureWorksDomainDetails = parse.ParseDomainRecords(ServiceCallThread.Domains);
-                                           AdventureWorksMeasureDetails = parse.ParseMeasureResponse(ServiceCallThread.Measures);
+                                           AdventureWorksDomainDetails = parse.ParseDomainRecords(_domains);
+                                           AdventureWorksMeasureDetails = parse.ParseMeasureResponse(_measures);
                                            groupList = _populateTopLevelHierarchy();
                                            ///parse webservice response and populate HashMap List
                                            _populateJSONResponseToUI(activityObj, expListAdapter, btn);
-                                       } catch (Exception e) {
-                                           String s = e.getMessage();
+                                       }
+                                       catch(Exception e)
+                                       {
+                                            String s=  e.getMessage();
                                        }
 
                                    }
                                }
         );
-
     }
-
 
     /**
      * Start Service thread
@@ -85,13 +108,13 @@ public class MainActivity  extends Activity{
         //Initialize domain and measure as START
         //After valid population of both the variables, thread will come out of sleep mode
 
-        ServiceCallThread.Domains = "START";
-        ServiceCallThread.Measures = "START";
+        PopulateDetails._domains = "START";
+        PopulateDetails._measures = "START";
         ServiceCallThread sthread = new ServiceCallThread();
         try {
             sthread.join();
             sthread.start();
-            while (ServiceCallThread.Domains == "START" || ServiceCallThread.Measures == "START") {
+            while (PopulateDetails._domains == "START" || PopulateDetails._measures == "START") {
                 try {
                     Thread.sleep(10);
                 } catch (Exception ex) {
@@ -107,7 +130,7 @@ public class MainActivity  extends Activity{
      * Populates top level hierarchy of domain
      * @return
      */
-    private ArrayList<String> _populateTopLevelHierarchy()
+    private  ArrayList<String> _populateTopLevelHierarchy()
     {
         ArrayList<String> list  =new ArrayList<String>();
         Map<String,List<String>> domainDetails = AdventureWorksDomainDetails;
@@ -117,7 +140,7 @@ public class MainActivity  extends Activity{
             list.add(pair.getKey().toString());
             it.remove();
         }
-        return  list;
+         return  list;
     }
 
     /***
@@ -176,25 +199,4 @@ public class MainActivity  extends Activity{
     }
 
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
 }

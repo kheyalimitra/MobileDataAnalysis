@@ -75,8 +75,6 @@ public class CallService {
     public String CallDimention()throws XmlPullParserException, IOException
     {
         SoapObject request = new SoapObject(WSDL_TARGET_NAMESPACE,OPERATION_NAME_Domain);
-       // request.addProperty("userid", "");
-        //request.addProperty("password","");
         SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(
                 SoapEnvelope.VER11);
         envelope.dotNet = true;
@@ -93,23 +91,12 @@ public class CallService {
         }
 
         envelope.setOutputSoapObject(request);
-
-
-        HttpTransportSE httpTransport = new HttpTransportSE(conn.getURL().toString());//new HttpTransportSE(SOAP_ADDRESS);
-        //java.util.Objects response;
+        HttpTransportSE httpTransport = new HttpTransportSE(conn.getURL().toString());
         String  res= null;
         try {
             httpTransport.call(SOAP_ACTION_Dimen, envelope);
            res = envelope.getResponse().toString();
-           /* if(response != null)
-            {
 
-                SoapObject tabResponse = (SoapObject) response.getProperty(0);
-
-                SoapObject tabResult = (SoapObject) tabResponse .getProperty(0);
-                response = tabResponse;
-
-        }*/
         }
         catch (Exception e) {
             int x= 0;
@@ -136,12 +123,9 @@ public class CallService {
     public String CallMeasures()throws XmlPullParserException, IOException
     {
         SoapObject request = new SoapObject(WSDL_TARGET_NAMESPACE,OPERATION_NAME_Measure);
-        // request.addProperty("userid", "");
-        //request.addProperty("password","");
         SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(
-                SoapEnvelope.VER11);
+              SoapEnvelope.VER11);
         envelope.dotNet = true;
-
         HttpURLConnection conn = null;
         URL url = new URL(SOAP_ADDRESS);
         if (url.getProtocol().toLowerCase().equals("https")) {
@@ -152,10 +136,7 @@ public class CallService {
         } else {
             conn = (HttpURLConnection) url.openConnection();
         }
-
         envelope.setOutputSoapObject(request);
-
-
         HttpTransportSE httpTransport = new HttpTransportSE(conn.getURL().toString());//new HttpTransportSE(SOAP_ADDRESS);
         //java.util.Objects response;
         String  res= null;

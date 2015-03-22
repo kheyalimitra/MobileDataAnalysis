@@ -5,14 +5,18 @@ import org.ksoap2.serialization.SoapObject;
  */
 public class ServiceCallThread extends  Thread{
     public  CallService cs;
+    public static String Domains;
+    public static String Measures;
     public void run(){
         try{
             cs=new CallService();
             String resp_Domain=cs.CallDimention();
             String resp_Measures = cs.CallMeasures();
-            MainActivity.domains = resp_Domain;
-            MainActivity.measures = resp_Measures;
+            Domains=resp_Domain;
+            Measures = resp_Measures;
         }catch(Exception ex)
-        {MainActivity.domains=ex.toString();}
+        {
+            String s = ex.getMessage();
+        }
     }
 }
