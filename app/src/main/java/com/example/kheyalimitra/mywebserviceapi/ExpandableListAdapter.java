@@ -12,6 +12,7 @@ import android.widget.BaseExpandableListAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -23,20 +24,26 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
     private Activity context;
     public Map<String, List<String>> AdvWorkDetails;
     public List<String> dimentions;
-
-    public ExpandableListAdapter(Activity context) {
+    public List<String> hierarchy;
+    public ExpandableListAdapter(Activity context,List<String> dimentions,
+                                 Map<String, List<String>> AdvWorkDetails) {
         this.context = context;
+        this.AdvWorkDetails = AdvWorkDetails;
+        this.dimentions = dimentions;
 
     }
-    public ExpandableListAdapter( List<String> dimentions,
+
+    /* public ExpandableListAdapter( List<String> dimentions,
                                  Map<String, List<String>> AdvWorkDetails) {
         this.AdvWorkDetails = AdvWorkDetails;
         this.dimentions = dimentions;
-    }
+    }*/
     public Object getChild(int groupPosition, int childPosition) {
         return AdvWorkDetails.get(dimentions.get(groupPosition)).get(childPosition);
     }
-
+    public Object getSubChild( int childPosition) {
+        return hierarchy.get(childPosition);
+    }
     public long getChildId(int groupPosition, int childPosition) {
         return childPosition;
     }
@@ -44,20 +51,18 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
 
     public View getChildView(final int groupPosition, final int childPosition,
                              boolean isLastChild, View convertView, ViewGroup parent) {
-        final String laptop = (String) getChild(groupPosition, childPosition);
+        final String Children = (String) getChild(groupPosition, childPosition);
         LayoutInflater inflater = context.getLayoutInflater();
 
         if (convertView == null) {
             convertView = inflater.inflate(R.layout.child_items, null);
         }
-
         TextView item = (TextView) convertView.findViewById(R.id.DomainHierarchy);
-
-        ImageView delete = (ImageView) convertView.findViewById(R.id.delete);
-        delete.setOnClickListener(new View.OnClickListener() {
+        ImageView fetchChildren = (ImageView) convertView.findViewById(R.id.fetchChildren);
+        fetchChildren.setOnClickListener(new View.OnClickListener() {
 
             public void onClick(View v) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(context);
+               /* AlertDialog.Builder builder = new AlertDialog.Builder(context);
                 builder.setMessage("Do you want to remove?");
                 builder.setCancelable(false);
                 builder.setPositiveButton("Yes",
@@ -76,11 +81,11 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
                             }
                         });
                 AlertDialog alertDialog = builder.create();
-                alertDialog.show();
+                alertDialog.show();*/
             }
         });
 
-        item.setText(laptop);
+        item.setText(Children);
         return convertView;
     }
 
@@ -102,7 +107,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
 
     public View getGroupView(int groupPosition, boolean isExpanded,
                              View convertView, ViewGroup parent) {
-        String laptopName = (String) getGroup(groupPosition);
+        String groupNames = (String) getGroup(groupPosition);
         if (convertView == null) {
             LayoutInflater infalInflater = (LayoutInflater) context
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -111,7 +116,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
         }
         TextView item = (TextView) convertView.findViewById(R.id.DomainHierarchy);
         item.setTypeface(null, Typeface.BOLD);
-        item.setText(laptopName);
+        item.setText(groupNames);
         return convertView;
     }
 

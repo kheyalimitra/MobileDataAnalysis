@@ -8,14 +8,13 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_centerVertical="true"
-        android:paddingLeft="12dp"
-        android:textSize="12sp" />
+        android:paddingLeft="25dp"
+        android:textSize="12sp"/>
 
     <ImageView
-        android:id="@+id/delete"
+        android:id="@+id/fetchChildren"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
-
         android:contentDescription="@string/app_name"/>
 </LinearLayout>

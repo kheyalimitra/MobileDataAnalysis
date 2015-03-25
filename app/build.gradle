@@ -24,4 +24,5 @@ dependencies {
     compile 'com.android.support:appcompat-v7:21.0.3'
     compile project(':ksoap2-android-assembly-3.1.1-jar-with-dependencies')
     compile project(':json-simple-1.1.1')
+    compile 'com.github.bmelnychuk:atv:1.2.2'
 }

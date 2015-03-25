@@ -3,7 +3,7 @@ package com.example.kheyalimitra.mywebserviceapi;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -17,6 +17,7 @@ public class ParseJSONResponse {
     public Map<String, List<String>> AdventureWorksDomainDetails;
     //Measure details
     public ArrayList<String> AdventureWorksMeasureDetails ;
+    public ArrayList<String> AdventureWorksHierarchyDetails ;
 
     /***
      * Parse JSON response for domains
@@ -28,24 +29,26 @@ public class ParseJSONResponse {
         AdventureWorksDomainDetails = new LinkedHashMap<String, List<String>>();
         JSONParser parser=new JSONParser();
         Object obj=parser.parse(domains);
-        HashMap<String,Object> domainDetails = (HashMap<String,Object>)obj;
+        Map<String,Object> domainDetails = (Map<String,Object>)obj;
         Iterator it = domainDetails.entrySet().iterator();
         while (it.hasNext()) {
-            HashMap.Entry pair = (HashMap.Entry)it.next();
+            Map.Entry pair = (Map.Entry)it.next();
             List<String> childrenList=  new ArrayList<String>();
-            HashMap<String,Object> innerchild = (HashMap<String,Object>)pair.getValue();
+            Map<String,Object> innerchild = (Map<String,Object>)pair.getValue();
             Iterator inner = innerchild.entrySet().iterator();
             while(inner.hasNext())
             {
-                HashMap.Entry child = (HashMap.Entry)inner.next();
+                Map.Entry child = (Map.Entry)inner.next();
                 String []value = child.getValue().toString().substring(1,child.getValue().toString().length()-2).split(",");
                 childrenList.add(child.getKey().toString());
 
             }
+            Collections.sort(childrenList);
             AdventureWorksDomainDetails.put(pair.getKey().toString(),childrenList);
             inner.remove();
             it.remove();
         }
+
         return AdventureWorksDomainDetails;
     }
 
@@ -54,15 +57,39 @@ public class ParseJSONResponse {
      * @param measures
      * @return
      */
-    public ArrayList<String> ParseMeasureResponse(String measures) {
+    public ArrayList<String> ParseMeasureResponse(String measures) throws ParseException{
         AdventureWorksMeasureDetails =  new ArrayList<String>();
-        String commaseparations[] = measures.trim().split(",");
-        for (int i=0;i<commaseparations.length;i++)
+        JSONParser parser=new JSONParser();
+        Object obj=parser.parse(measures);
+        ArrayList<String> measureDetails = (ArrayList<String>)obj;
+        Iterator it = measureDetails.iterator();
+        while(it.hasNext())
         {
-            String splits[]= commaseparations[i].split("0");
-            AdventureWorksMeasureDetails.add(splits[1].replace("|","").replace("\"","").replace("]",""));
+            String[] modifiedVal  = it.next().toString().split("0");
+            AdventureWorksMeasureDetails.add(modifiedVal[1].replace("|","").replace("\"","").replace("]",""));
+            it.remove();
         }
+        Collections.sort(AdventureWorksMeasureDetails);
         return  AdventureWorksMeasureDetails;
+    }
+    public ArrayList<String> ParseHierarchy(String hierarchy) throws ParseException
+    {
+        AdventureWorksHierarchyDetails =  new ArrayList<String>();
+        JSONParser parser=new JSONParser();
+        Object obj=parser.parse(hierarchy);
+        ArrayList<String> measureDetails = (ArrayList<String>)obj;
+        Iterator it = measureDetails.iterator();
+        while(it.hasNext())
+        {
+            String value = it.next().toString();
+            int subStringEndPos  = value.indexOf("|",2);
+            String child = value.substring(2,subStringEndPos);
+            AdventureWorksHierarchyDetails.add(child);
+            it.remove();
+        }
+        Collections.sort(AdventureWorksHierarchyDetails);
+
+        return  AdventureWorksHierarchyDetails;
     }
 
 }

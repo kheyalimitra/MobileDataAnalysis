@@ -12,14 +12,22 @@ import android.widget.Button;
 import android.app.Activity;
 import android.widget.ExpandableListView;
 import android.widget.ListView;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+
+import com.unnamed.b.atv.model.TreeNode;
+import com.unnamed.b.atv.view.AndroidTreeView;
+
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 
 public class MainActivity  extends Activity{
@@ -41,10 +49,13 @@ public class MainActivity  extends Activity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         final Button btn = (Button) findViewById(R.id.getbtn);
-        ///Display data in Text view and List View
 
+        //final TextView dimView = (TextView) findViewById(R.id.domainView);
+        //final TextView measureView = (TextView) findViewById(R.id.measureView);
+        //dimView.setVisibility(View.INVISIBLE);
+        //measureView.setVisibility(View.INVISIBLE);
+        ///Display data in Text view and List View
         final AlertDialog ad = new AlertDialog.Builder(this).create();
-        final ExpandableListAdapter expListAdapter = new ExpandableListAdapter(this);
         final Activity activityObj = this;
         //PopulateDetails details =  new PopulateDetails();
 
@@ -65,7 +76,25 @@ public class MainActivity  extends Activity{
                                            AdventureWorksMeasureDetails = parse.ParseMeasureResponse(ServiceCallThread.Measures);
                                            groupList = _populateTopLevelHierarchy();
                                            ///parse webservice response and populate HashMap List
-                                           _populateJSONResponseToUI(activityObj, expListAdapter, btn);
+                                           _populateJSONResponseToUI(activityObj, btn);
+
+
+                                           TreeNode root = TreeNode.root();
+                                           TreeNode parent = new TreeNode("MyParentNode");
+                                           TreeNode child0 = new TreeNode("ChildNode0");
+                                           TreeNode child1 = new TreeNode("ChildNode1");
+                                           TreeNode child01 = new TreeNode("ChildNode01");
+                                           TreeNode child12 = new TreeNode("ChildNode12");
+                                           parent.addChildren(child0, child1);
+                                           child0.addChild(child01);
+                                           child1.addChild(child12);
+                                           root.addChild(parent);
+                                           AndroidTreeView tView = new AndroidTreeView(activityObj,root);
+                                           ScrollView sv =  (ScrollView)findViewById(R.id.scrollView);
+                                           sv.addView(tView.getView());
+                                           IconTreeItem nodeItem = new IconTreeItem();
+                                           TreeNode child= new TreeNode(nodeItem).setViewHolder(new CustomTreeNode(activityObj));
+
                                        } catch (Exception e) {
                                            String s = e.getMessage();
                                        }
@@ -87,7 +116,7 @@ public class MainActivity  extends Activity{
 
         ServiceCallThread.Domains = "START";
         ServiceCallThread.Measures = "START";
-        ServiceCallThread sthread = new ServiceCallThread();
+        ServiceCallThread sthread = new ServiceCallThread("START");
         try {
             sthread.join();
             sthread.start();
@@ -111,24 +140,20 @@ public class MainActivity  extends Activity{
     {
         ArrayList<String> list  =new ArrayList<String>();
         Map<String,List<String>> domainDetails = AdventureWorksDomainDetails;
-        Iterator it = domainDetails.entrySet().iterator();
-        while (it.hasNext()) {
-            HashMap.Entry pair = (HashMap.Entry) it.next();
-            list.add(pair.getKey().toString());
-            it.remove();
-        }
+        Set<String> keys= AdventureWorksDomainDetails.keySet();
+        list.addAll(keys);
+        Collections.sort(list);
         return  list;
     }
 
     /***
      * Displays the records in Expandable List adapter and List view
      * @param activityObj
-     * @param expListAdapter
      * @param btn
      */
-    private void _populateJSONResponseToUI(Activity activityObj, final ExpandableListAdapter expListAdapter, Button btn) {
+    private void _populateJSONResponseToUI(Activity activityObj, Button btn) {
 
-        TextView domainView = (TextView) findViewById(R.id.webServiceText);
+        TextView errorView = (TextView) findViewById(R.id.ErrorText);
         ListView mView = (ListView) findViewById(R.id.measurelistView);
         ExpandableListView expListView = (ExpandableListView) findViewById(R.id.expandableListView);
         try
@@ -136,29 +161,65 @@ public class MainActivity  extends Activity{
             ArrayAdapter<String> arrayAdapter =
                     new ArrayAdapter<String>(activityObj,android.R.layout.simple_list_item_1, AdventureWorksMeasureDetails ); // mView.setAdapter(arrayAdapter);
             mView.setAdapter(arrayAdapter);
-            expListAdapter.AdvWorkDetails = AdventureWorksDomainDetails;
-            expListAdapter.dimentions =  groupList;
+            final ExpandableListAdapter expListAdapter = new ExpandableListAdapter(activityObj,groupList,AdventureWorksDomainDetails);
             TextView tView =  (TextView) findViewById(R.id.textView);
             btn.setVisibility(View.GONE);
+            errorView.setVisibility(View.GONE);
             tView.setVisibility(View.GONE);
-            expListView.setAdapter(expListAdapter);
+            //expListView.setAdapter(expListAdapter);
+
             expListView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
                 public boolean onChildClick(ExpandableListView parent, View v,
                                             int groupPosition, int childPosition, long id) {
-                    final String selected = (String) expListAdapter.getChild(
+
+                     String selectedChild = (String) expListAdapter.getChild(
                             groupPosition, childPosition);
-                    Toast.makeText(getBaseContext(), selected, Toast.LENGTH_LONG)
-                            .show();
+                     String selectedGroup = (String) expListAdapter.getGroup(groupPosition);
+                    /*Toast.makeText(getBaseContext(), selected, Toast.LENGTH_LONG)
+                            .show();*/
+                    String hierarchy = selectedGroup+"."+selectedChild;
+                    try {
+                        _startServiceThreadforHierarchy(hierarchy);
+                        ParseJSONResponse parse = new ParseJSONResponse();
+                        ArrayList<String> AdventureWorksHierarchyDetails = parse.ParseHierarchy(ServiceCallThread.Hierarchy);
+                        //expListAdapter.setHierarchy(AdventureWorksHierarchyDetails);
+
+                    }
+                    catch (Exception e)
+                    {
+
+                    }
                     return true;
                 }
             });
         }
         catch(Exception ex)
         {
-            domainView.setText("Error!Please Try Again.");
+            errorView.setVisibility(View.VISIBLE);
+            errorView.setText("Error!Please Try Again.");
         }
     }
+private  void _startServiceThreadforHierarchy(String param)
+{
+     //Initialize domain and measure as START
+    //After valid population of both the variables, thread will come out of sleep mode
 
+    ServiceCallThread.Hierarchy = "START";
+    ServiceCallThread sthread = new ServiceCallThread(param);
+    try {
+        sthread.join();
+        sthread.start();
+        while (ServiceCallThread.Hierarchy == "START" ) {
+            try {
+                Thread.sleep(10);
+            } catch (Exception ex) {
+                throw new Exception(ex.getMessage());
+            }
+        }
+    } catch (Exception e) {
+
+    }
+}
     private void setGroupIndicatorToRight() {
         /* Get the screen width */
         DisplayMetrics dm = new DisplayMetrics();
