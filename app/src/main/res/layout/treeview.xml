@@ -10,12 +10,12 @@
         android:background="@android:color/holo_blue_dark"
         android:padding="2dp"
         android:text="Dimensions/Hierarchy:"
-        android:textSize="16sp" />
+        android:textSize="14sp" />
 
     <RelativeLayout
         android:id="@+id/DimensionListView"
         android:layout_width="match_parent"
-        android:layout_height="250dp"
+        android:layout_height="230dp"
         android:layout_below="@id/DimensionTreeNodeNode"></RelativeLayout>
 
     <TextView
@@ -26,11 +26,22 @@
         android:background="@android:color/holo_blue_dark"
         android:padding="2dp"
         android:text="Measures:"
-        android:textSize="16sp" />
+        android:textSize="14sp" />
 
     <RelativeLayout
         android:id="@+id/MeasureListView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/MeasureListNode"></RelativeLayout>
+        android:layout_below="@id/MeasureListNode">
+
+
+        <Button
+            android:layout_width="100dp"
+            android:layout_height="50dp"
+            android:text="Analyze"
+            android:id="@+id/AnalyzeButton"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true" />
+    </RelativeLayout>
 </RelativeLayout>

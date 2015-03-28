@@ -120,15 +120,12 @@ public class MainActivity  extends ActionBarActivity { //extends Activity{
     //private ArrayList<String> _populateTopLevelHierarchy()
     public TreeNode PopulateTreeHierarchy() {
         TreeNode dRoot = new TreeNode("Dimension/Hierarchy:");
-        TreeNode dimRoot = new TreeNode("");
+        TreeNode dimRoot = new TreeNode("D Root");
 
         try {
 
             ArrayList<String> list = new ArrayList<String>();
             Map<String, List<String>> domainDetails = AdventureWorksDomainDetails;
-            //Set<String> keys = AdventureWorksDomainDetails.keySet();
-            //list.addAll(keys);
-            //Collections.sort(list);
             /// populate tree nodes
             Iterator it = AdventureWorksDomainDetails.entrySet().iterator();
             while (it.hasNext()) {
@@ -156,7 +153,7 @@ public class MainActivity  extends ActionBarActivity { //extends Activity{
 
     public TreeNode PopulateMeasures() {
         TreeNode mRoot = new TreeNode("Measures:");
-        TreeNode mesRoot = new TreeNode("");
+        TreeNode mesRoot = new TreeNode("M Root");
         try {
 
             Iterator itr = AdventureWorksMeasureDetails.iterator();
@@ -191,7 +188,7 @@ public class MainActivity  extends ActionBarActivity { //extends Activity{
             // mView.setAdapter(arrayAdapter);
             final ExpandableListAdapter expListAdapter = new ExpandableListAdapter(activityObj, groupList, AdventureWorksDomainDetails);
             //TextView tView =  (TextView) findViewById(R.id.textView);
-            btn.setVisibility(View.GONE);
+            //btn.setVisibility(View.GONE);
             //errorView.setVisibility(View.GONE);
             //tView.setVisibility(View.GONE);
             //expListView.setAdapter(expListAdapter);
@@ -207,7 +204,7 @@ public class MainActivity  extends ActionBarActivity { //extends Activity{
                             .show();*/
                     String hierarchy = selectedGroup + "." + selectedChild;
                     try {
-                        _startServiceThreadforHierarchy(hierarchy);
+                        //_startServiceThreadforHierarchy(hierarchy);
                         ParseJSONResponse parse = new ParseJSONResponse();
                         ArrayList<String> AdventureWorksHierarchyDetails = parse.ParseHierarchy(ServiceCallThread.Hierarchy);
                         //expListAdapter.setHierarchy(AdventureWorksHierarchyDetails);
@@ -224,7 +221,7 @@ public class MainActivity  extends ActionBarActivity { //extends Activity{
         }
     }
 
-private  void _startServiceThreadforHierarchy(String param)
+public  void StartServiceThreadforHierarchy(String param)
 {
      //Initialize domain and measure as START
     //After valid population of both the variables, thread will come out of sleep mode
