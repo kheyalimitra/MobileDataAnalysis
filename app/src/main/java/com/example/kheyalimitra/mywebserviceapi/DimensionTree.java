@@ -3,8 +3,8 @@ package com.example.kheyalimitra.mywebserviceapi;
 /**
  * Created by KheyaliMitra on 3/25/2015.
  */
+
 import android.app.Fragment;
-import android.content.Context;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -14,10 +14,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.content.Context;
 
 import com.unnamed.b.atv.model.TreeNode;
-
 import com.unnamed.b.atv.view.AndroidTreeView;
 
 public class DimensionTree extends Fragment{
@@ -26,7 +24,21 @@ public class DimensionTree extends Fragment{
     private TextView mesNode;
     private  AndroidTreeView mView;
     private AndroidTreeView tView;
+    private int counter = 0;
+    private TreeNode.TreeNodeClickListener nodeClickListener = new TreeNode.TreeNodeClickListener() {
+        @Override
+        public void onClick(TreeNode node, Object value) {
+            try {
 
+                String child = (String) node.getValue();
+                //String parent =node.getPath();
+                TreeNode p = node.getParent();
+                dimNode.setText("Selected: " + (String) p.getValue() + "." + child);
+            } catch (Exception e) {
+                String s;
+            }
+        }
+    };
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -36,40 +48,50 @@ public class DimensionTree extends Fragment{
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+
+        //Call service and parse JSON
         ParseJSONResponse parse = new ParseJSONResponse();
         MainActivity main = new MainActivity();
+        //Start Service Thread
         main.StartServiceThread();
 
+        //Get All layout from treeview.xml
         View rootView = inflater.inflate(R.layout.treeview, null, false);
-        ViewGroup containerView = (ViewGroup) rootView.findViewById(R.id.container);
-        dimNode = (TextView) rootView.findViewById(R.id.selectedNode);
-        mesNode =(TextView) rootView.findViewById(R.id.MeasureNode);
-        ViewGroup measureContainer =(ViewGroup) rootView.findViewById(R.id.container2);
-
+        ViewGroup containerView = (ViewGroup) rootView.findViewById(R.id.DimensionListView);
+        dimNode = (TextView) rootView.findViewById(R.id.DimensionTreeNodeNode);
+        mesNode = (TextView) rootView.findViewById(R.id.MeasureListNode);
+        ViewGroup measureContainer = (ViewGroup) rootView.findViewById(R.id.MeasureListView);
 
         try {
+            //Parse Domain List
             main.AdventureWorksDomainDetails = parse.ParseDomainRecords(ServiceCallThread.Domains);
+            //Parse Measure LIst
             main.AdventureWorksMeasureDetails = parse.ParseMeasureResponse(ServiceCallThread.Measures);
-          TreeNode root = main.PopulateTreeHierarchy();
-          IconTreeItem nodeItem = new IconTreeItem(0,"Dimension/Hierarchy:");
-          root.setViewHolder(new IconTreeItemHolder(main.MainContext));
-          root.setClickListener(nodeClickListener);
-        tView = new AndroidTreeView(getActivity(), root);
-        tView.setDefaultAnimation(true);
-        tView.setDefaultContainerStyle(R.style.TreeNodeStyleCustom);
-           //tView.setDefaultViewHolder(IconTreeItemHolder.class);
-        tView.setDefaultNodeClickListener(nodeClickListener);
-        containerView.addView(tView.getView());
-            tView.collapseAll();
-        if (savedInstanceState != null) {
-            String state = savedInstanceState.getString("tState");
-            if (!TextUtils.isEmpty(state)) {
-                tView.restoreState(state);
-            }
-        }
+            //Populate Dimension List view
+            TreeNode root = main.PopulateTreeHierarchy();
+            IconTreeItem nodeItem = new IconTreeItem(0, "Dimension/Hierarchy:");
 
-            TreeNode measuresRoot =  main.PopulateMeasures();
-            IconTreeItem mesItem = nodeItem = new IconTreeItem(1,"Measures");
+            root.setViewHolder(new IconTreeItemHolder(main.MainContext));
+            root.setClickListener(nodeClickListener);
+
+            tView = new AndroidTreeView(getActivity(), root);
+            tView.setDefaultAnimation(true);
+            tView.setDefaultContainerStyle(R.style.TreeNodeStyleCustom);
+
+            //tView.setDefaultViewHolder(IconTreeItemHolder.class);
+            tView.setDefaultNodeClickListener(nodeClickListener);
+            containerView.addView(tView.getView());
+            tView.collapseAll();
+
+            if (savedInstanceState != null) {
+                String state = savedInstanceState.getString("tState");
+                if (!TextUtils.isEmpty(state)) {
+                    tView.restoreState(state);
+                }
+            }
+
+            TreeNode measuresRoot = main.PopulateMeasures();
+            IconTreeItem mesItem = nodeItem = new IconTreeItem(1, "Measures");
             measuresRoot.setViewHolder(new IconTreeItemHolder(main.MainContext));
             measuresRoot.setClickListener(nodeClickListener);
             mView = new AndroidTreeView(getActivity(), measuresRoot);
@@ -84,20 +106,26 @@ public class DimensionTree extends Fragment{
                 }
             }
             mView.collapseAll();
-    }
-    catch (Exception e)
-    {
-        String s = e.getMessage();
-    }
+        } catch (Exception e) {
+            String s = e.getMessage();
+        }
         return rootView;
     }
-
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(com.example.kheyalimitra.mywebserviceapi.R.menu.menu, menu);
         super.onCreateOptionsMenu(menu, inflater);
     }
+/*
+    private void fillDownloadsFolder(TreeNode node) {
+        TreeNode downloads = new TreeNode(new IconTreeItem(R.string.ic_folder, "Downloads" + (counter++)));
+        node.addChild(downloads);
+        if (counter < 5) {
+            fillDownloadsFolder(downloads);
+        }
+    }
+*/
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -112,34 +140,6 @@ public class DimensionTree extends Fragment{
         }
         return true;
     }
-
-    private int counter = 0;
-/*
-    private void fillDownloadsFolder(TreeNode node) {
-        TreeNode downloads = new TreeNode(new IconTreeItem(R.string.ic_folder, "Downloads" + (counter++)));
-        node.addChild(downloads);
-        if (counter < 5) {
-            fillDownloadsFolder(downloads);
-        }
-    }
-*/
-
-    private TreeNode.TreeNodeClickListener nodeClickListener = new TreeNode.TreeNodeClickListener() {
-        @Override
-        public void onClick(TreeNode node, Object value) {
-            try {
-
-                String  child =(String) node.getValue();
-                //String parent =node.getPath();
-                TreeNode p =  node.getParent();
-                dimNode.setText("Selected: " + (String)p.getValue()+"."+child);
-            }
-            catch(Exception e)
-            {
-                String s;
-            }
-        }
-    };
 
     @Override
     public void onSaveInstanceState(Bundle outState) {

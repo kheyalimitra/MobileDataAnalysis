@@ -3,32 +3,34 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
     <TextView
-        android:padding="2dp"
-        android:textSize="16sp"
-        android:text="Dimensions/Hierarchy:"
+        android:id="@+id/DimensionTreeNodeNode"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:background="@android:color/holo_blue_dark"
-        android:id="@+id/selectedNode"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:padding="2dp"
+        android:text="Dimensions/Hierarchy:"
+        android:textSize="16sp" />
 
     <RelativeLayout
-        android:layout_below="@id/selectedNode"
+        android:id="@+id/DimensionListView"
         android:layout_width="match_parent"
         android:layout_height="250dp"
-        android:id="@+id/container"></RelativeLayout>
+        android:layout_below="@id/DimensionTreeNodeNode"></RelativeLayout>
+
     <TextView
-        android:padding="2dp"
-        android:textSize="16sp"
-        android:text="Measures:"
-        android:background="@android:color/holo_blue_dark"
-        android:id="@+id/MeasureNode"
-        android:layout_below="@+id/container"
+        android:id="@+id/MeasureListNode"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/DimensionListView"
+        android:background="@android:color/holo_blue_dark"
+        android:padding="2dp"
+        android:text="Measures:"
+        android:textSize="16sp" />
+
     <RelativeLayout
-        android:layout_below="@id/MeasureNode"
+        android:id="@+id/MeasureListView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/container2"></RelativeLayout>
+        android:layout_below="@id/MeasureListNode"></RelativeLayout>
 </RelativeLayout>
