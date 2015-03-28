@@ -7,6 +7,8 @@ package com.example.kheyalimitra.mywebserviceapi;
 import android.app.Fragment;
 import android.content.Context;
 import android.os.Bundle;
+import android.provider.Contacts;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -19,6 +21,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.unnamed.b.atv.model.TreeNode;
 import com.unnamed.b.atv.view.AndroidTreeView;
@@ -88,8 +91,9 @@ public class DimensionTree extends Fragment{
                 {
                     if(root.equals("M Root"))
                     {
-                        mesNode.setText("Selected: " + "."+parentNode + "." + child);
-                        SelectedMeasures.add(parentNode+"."+child);
+                        mesNode.setText("Selected: " + child);
+                        if(!child.equals("Measures:") && child.equals("M Root") )
+                        SelectedMeasures.add(child);
                     }
 
 
@@ -119,17 +123,61 @@ public class DimensionTree extends Fragment{
         final LayoutInflater innerInfl = inflater;
         //Get All layout from treeview.xml
         View rootView = inflater.inflate(R.layout.treeview, null, false);
-        ViewGroup containerView = (ViewGroup) rootView.findViewById(R.id.DimensionListView);
+        final ViewGroup containerView = (ViewGroup) rootView.findViewById(R.id.DimensionListView);
         dimNode = (TextView) rootView.findViewById(R.id.DimensionTreeNodeNode);
         mesNode = (TextView) rootView.findViewById(R.id.MeasureListNode);
-        ViewGroup measureContainer = (ViewGroup) rootView.findViewById(R.id.MeasureListView);
+        final ViewGroup measureContainer = (ViewGroup) rootView.findViewById(R.id.MeasureListView);
         final Button analyzeBtn = (Button)rootView.findViewById(R.id.AnalyzeButton);
-
+        final Button execBtn = (Button)rootView.findViewById(R.id.executeButton);
+        final ListView selectedQuery = (ListView)rootView.findViewById(R.id.queryView);
+        final TextView finalSelection =(TextView)rootView.findViewById(R.id.finalSelections);
+        execBtn.setVisibility(View.INVISIBLE);
+        selectedQuery.setVisibility(View.INVISIBLE);
+        finalSelection.setVisibility(View.INVISIBLE);
         try {
             View.OnClickListener buttonListener = new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    _processselectedquery(innerInfl,container);
+                    containerView.setVisibility(View.INVISIBLE);
+                    measureContainer.setVisibility(View.INVISIBLE);
+                    dimNode.setVisibility(View.INVISIBLE);
+                    mesNode.setVisibility(View.INVISIBLE);
+                    execBtn.setVisibility(View.VISIBLE);
+                    selectedQuery.setVisibility(View.VISIBLE);
+                    finalSelection.setVisibility(View.VISIBLE);
+                    final LinkedHashMap<String, String> listItems = new LinkedHashMap<>();
+                    listItems.put("First","Selected Dimensions are given below");
+                    for( int i=0;i<SelectedDimensions.size();i++) {
+                        listItems.put("Selected Dimensions "+i+1, SelectedDimensions.get(i));
+                    }
+                    listItems.put("Second","Selected Measures are given below:");
+                    for( int i=0;i<SelectedMeasures.size();i++)
+                        listItems.put("Selected Measures"+i+1, SelectedMeasures.get(i));
+                    List<String> list = new ArrayList(listItems.values());
+                    SimpleArrayAdapter adapter = new SimpleArrayAdapter(MainActivity.MainContext, list);
+                    //Sets Adapter
+                    selectedQuery.setAdapter(adapter);
+
+                    //Onclick of List view
+                    selectedQuery.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                                                               @Override
+
+                                                               public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                                                                   try {
+                                                                       ///
+                                                                       int i= position;
+                                                                       String itemSelected = (String) (selectedQuery.getItemAtPosition(position));
+                                                                       Toast.makeText(MainActivity.MainContext, itemSelected, Toast.LENGTH_SHORT).show();
+                                                                       //listItems.remove(position);
+                                                                       execBtn.setText("Clicked!");
+
+                                                                   } catch (Exception e) {
+
+                                                                   }
+                                                               }
+                                                           }
+                    );
+
                 }
 
             };

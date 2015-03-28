@@ -136,6 +136,11 @@ public class MainActivity  extends ActionBarActivity { //extends Activity{
                     Iterator inner = innerchild.iterator();
                     while (inner.hasNext()) {
                         String child = (String) inner.next();
+                        if(child.contains("."))
+                        {
+                            int pos = child.indexOf(".");
+                            child=child.substring(pos+1);
+                        }
                         TreeNode c = new TreeNode(child);
                         t.addChild(c);
 
