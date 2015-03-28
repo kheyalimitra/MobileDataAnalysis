@@ -131,6 +131,7 @@ public class DimensionTree extends Fragment{
                 public void onClick(View v) {
                     _processselectedquery(innerInfl,container);
                 }
+
             };
             analyzeBtn.setOnClickListener(buttonListener);
             //Parse Domain List
@@ -181,6 +182,7 @@ public class DimensionTree extends Fragment{
         }
         return rootView;
     }
+
 private  void _processselectedquery(LayoutInflater inflater, final ViewGroup container)
 {
 
