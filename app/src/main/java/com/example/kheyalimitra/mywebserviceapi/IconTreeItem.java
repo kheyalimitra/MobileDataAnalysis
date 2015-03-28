@@ -1,9 +1,16 @@
 package com.example.kheyalimitra.mywebserviceapi;
 
-/**
- * Created by KheyaliMitra on 3/25/2015.
- */
-class IconTreeItem {
+public class IconTreeItem {
     public int icon;
     public String text;
+
+    public IconTreeItem()
+    {
+
+    }
+
+    public IconTreeItem(int icon, String text) {
+        this.icon = icon;
+        this.text = text;
+    }
 }

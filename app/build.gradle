@@ -25,4 +25,5 @@ dependencies {
     compile project(':ksoap2-android-assembly-3.1.1-jar-with-dependencies')
     compile project(':json-simple-1.1.1')
     compile 'com.github.bmelnychuk:atv:1.2.2'
+    compile 'com.github.johnkil.print:print:1.2.3'
 }

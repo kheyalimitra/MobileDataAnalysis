@@ -2,6 +2,7 @@ package com.example.kheyalimitra.mywebserviceapi;
 
 import android.app.AlertDialog;
 import android.app.Service;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.view.Menu;
@@ -18,19 +19,27 @@ import android.widget.Toast;
 
 
 import com.unnamed.b.atv.model.TreeNode;
-import com.unnamed.b.atv.view.AndroidTreeView;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
+import android.content.Context;
+import android.content.Intent;
+import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Iterator;
+
 import java.util.Map;
 import java.util.Set;
 
 
-public class MainActivity  extends Activity{
+public class MainActivity  extends ActionBarActivity { //extends Activity{
 
     //Top level names of Domain
     List<String> groupList;
@@ -40,7 +49,7 @@ public class MainActivity  extends Activity{
 
     //Measure details
     public ArrayList<String> AdventureWorksMeasureDetails ;
-
+    public static Context MainContext;
     //List view object
     ExpandableListView expListView;
 
@@ -48,7 +57,9 @@ public class MainActivity  extends Activity{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        final Button btn = (Button) findViewById(R.id.getbtn);
+        //final Button btn = (Button) findViewById(R.id.getbtn);
+        final LinkedHashMap<String, Class<?>> listItems = new LinkedHashMap<>();
+        listItems.put("Get Dimensions and Measures", DimensionTree.class);
 
         //final TextView dimView = (TextView) findViewById(R.id.domainView);
         //final TextView measureView = (TextView) findViewById(R.id.measureView);
@@ -57,45 +68,47 @@ public class MainActivity  extends Activity{
         ///Display data in Text view and List View
         final AlertDialog ad = new AlertDialog.Builder(this).create();
         final Activity activityObj = this;
+        MainContext = activityObj;
         //PopulateDetails details =  new PopulateDetails();
 
         //details.BindButtonClick(btn, expListAdapter, activityObj);
 
-        btn.setOnClickListener(new View.OnClickListener() {
+
+        final List<String> list = new ArrayList(listItems.keySet());
+        final ListView listview = (ListView) findViewById(R.id.listview);
+        final SimpleArrayAdapter adapter = new SimpleArrayAdapter(this, list);
+        listview.setAdapter(adapter);
+        listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        //btn.setOnClickListener(new View.OnClickListener() {
 
                                    /**
                                     * Populates JSON data into view
                                     */
                                    @Override
-                                   public void onClick(View arg0) {
-
+                                  // public void onClick(View arg0) {
+                                   public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                                        try {
-                                           ParseJSONResponse parse = new ParseJSONResponse();
+
+                                           /*ParseJSONResponse parse = new ParseJSONResponse();
                                            _startServiceThread();
                                            AdventureWorksDomainDetails = parse.ParseDomainRecords(ServiceCallThread.Domains);
-                                           AdventureWorksMeasureDetails = parse.ParseMeasureResponse(ServiceCallThread.Measures);
-                                           groupList = _populateTopLevelHierarchy();
+                                           AdventureWorksMeasureDetails = parse.ParseMeasureResponse(ServiceCallThread.Measures);*/
+                                           //groupList = _populateTopLevelHierarchy();
                                            ///parse webservice response and populate HashMap List
-                                           _populateJSONResponseToUI(activityObj, btn);
+                                          // _populateJSONResponseToUI(activityObj, btn);
 
 
-                                           TreeNode root = TreeNode.root();
-                                           TreeNode parent = new TreeNode("MyParentNode");
-                                           TreeNode child0 = new TreeNode("ChildNode0");
-                                           TreeNode child1 = new TreeNode("ChildNode1");
-                                           TreeNode child01 = new TreeNode("ChildNode01");
-                                           TreeNode child12 = new TreeNode("ChildNode12");
-                                           parent.addChildren(child0, child1);
-                                           child0.addChild(child01);
-                                           child1.addChild(child12);
-                                           root.addChild(parent);
-                                           AndroidTreeView tView = new AndroidTreeView(activityObj,root);
-                                           ScrollView sv =  (ScrollView)findViewById(R.id.scrollView);
-                                           sv.addView(tView.getView());
-                                           IconTreeItem nodeItem = new IconTreeItem();
-                                           TreeNode child= new TreeNode(nodeItem).setViewHolder(new CustomTreeNode(activityObj));
+                                           ///// new code for tree view
 
-                                       } catch (Exception e) {
+                                          // Class<?> clazz = listItems.values().toArray(new Class<?>[]{})[position];
+                                           Intent i = new Intent(MainActivity.this, TreeViewActivity.class);
+                                           //Intent androidView = new Intent(MainActivity.this,DimensionTree.class);
+                                           Class<?> clazz = listItems.values().toArray(new Class<?>[]{})[position];
+                                           i.putExtra(TreeViewActivity.View_PARAM,clazz );
+                                           MainActivity.this.startActivity(i);
+                                           //MainActivity.this.startActivity(androidView);
+                                           ////////
+                                      } catch (Exception e) {
                                            String s = e.getMessage();
                                        }
 
@@ -109,7 +122,7 @@ public class MainActivity  extends Activity{
     /**
      * Start Service thread
      */
-    private void _startServiceThread(){
+    public void StartServiceThread(){
 
         //Initialize domain and measure as START
         //After valid population of both the variables, thread will come out of sleep mode
@@ -136,16 +149,67 @@ public class MainActivity  extends Activity{
      * Populates top level hierarchy of domain
      * @return
      */
-    private ArrayList<String> _populateTopLevelHierarchy()
+    //private ArrayList<String> _populateTopLevelHierarchy()
+    public TreeNode PopulateTreeHierarchy()
     {
-        ArrayList<String> list  =new ArrayList<String>();
-        Map<String,List<String>> domainDetails = AdventureWorksDomainDetails;
-        Set<String> keys= AdventureWorksDomainDetails.keySet();
-        list.addAll(keys);
-        Collections.sort(list);
-        return  list;
+        TreeNode dRoot = new TreeNode("Dimension/Hierarchy:");
+        TreeNode dimRoot = new TreeNode("");
+
+        try {
+
+            ArrayList<String> list = new ArrayList<String>();
+            Map<String, List<String>> domainDetails = AdventureWorksDomainDetails;
+            //Set<String> keys = AdventureWorksDomainDetails.keySet();
+            //list.addAll(keys);
+            //Collections.sort(list);
+            /// populate tree nodes
+            Iterator it = AdventureWorksDomainDetails.entrySet().iterator();
+            while (it.hasNext()) {
+                Map.Entry pair = (Map.Entry) it.next();
+                TreeNode t = new TreeNode(pair.getKey());
+                if(AdventureWorksDomainDetails.get(pair.getKey()).size()>1) {
+                    List<String> innerchild = (List<String>) pair.getValue();
+                    Iterator inner = innerchild.iterator();
+                    while (inner.hasNext()) {
+                        String child = (String) inner.next();
+                        TreeNode c = new TreeNode(child);
+                        t.addChild(c);
+
+                    }
+                }
+                dRoot.addChild(t);
+            }
+
+        }
+        catch (Exception e)
+        {
+                String s = e.getMessage();
+        }
+        dimRoot.addChild(dRoot);
+        return  dimRoot;
     }
 
+    public TreeNode PopulateMeasures()
+    {
+        TreeNode mRoot = new TreeNode("Measures:");
+        TreeNode mesRoot = new TreeNode("");
+        try {
+
+            Iterator itr = AdventureWorksMeasureDetails.iterator();
+            while (itr.hasNext()) {
+                String key = (String) itr.next();
+                TreeNode t = new TreeNode(key);
+                mRoot.addChild(t);
+            }
+        }
+        catch (Exception e)
+
+        {
+
+        }
+        mesRoot.addChild(mRoot);
+        return  mesRoot;
+    }
     /***
      * Displays the records in Expandable List adapter and List view
      * @param activityObj
@@ -153,19 +217,19 @@ public class MainActivity  extends Activity{
      */
     private void _populateJSONResponseToUI(Activity activityObj, Button btn) {
 
-        TextView errorView = (TextView) findViewById(R.id.ErrorText);
-        ListView mView = (ListView) findViewById(R.id.measurelistView);
-        ExpandableListView expListView = (ExpandableListView) findViewById(R.id.expandableListView);
+        //TextView errorView = (TextView) findViewById(R.id.ErrorText);
+        //ListView mView = (ListView) findViewById(R.id.measurelistView);
+        //ExpandableListView expListView = (ExpandableListView) findViewById(R.id.expandableListView);
         try
         {
             ArrayAdapter<String> arrayAdapter =
                     new ArrayAdapter<String>(activityObj,android.R.layout.simple_list_item_1, AdventureWorksMeasureDetails ); // mView.setAdapter(arrayAdapter);
-            mView.setAdapter(arrayAdapter);
+           // mView.setAdapter(arrayAdapter);
             final ExpandableListAdapter expListAdapter = new ExpandableListAdapter(activityObj,groupList,AdventureWorksDomainDetails);
-            TextView tView =  (TextView) findViewById(R.id.textView);
+            //TextView tView =  (TextView) findViewById(R.id.textView);
             btn.setVisibility(View.GONE);
-            errorView.setVisibility(View.GONE);
-            tView.setVisibility(View.GONE);
+            //errorView.setVisibility(View.GONE);
+            //tView.setVisibility(View.GONE);
             //expListView.setAdapter(expListAdapter);
 
             expListView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
@@ -195,8 +259,8 @@ public class MainActivity  extends Activity{
         }
         catch(Exception ex)
         {
-            errorView.setVisibility(View.VISIBLE);
-            errorView.setText("Error!Please Try Again.");
+           // errorView.setVisibility(View.VISIBLE);
+            //errorView.setText("Error!Please Try Again.");
         }
     }
 private  void _startServiceThreadforHierarchy(String param)
@@ -257,5 +321,16 @@ private  void _startServiceThreadforHierarchy(String param)
         }
 
         return super.onOptionsItemSelected(item);
+    }
+    private class SimpleArrayAdapter extends ArrayAdapter<String> {
+        public SimpleArrayAdapter(Context context, List<String> objects) {
+            super(context, android.R.layout.simple_list_item_1, objects);
+
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return position;
+        }
     }
 }
