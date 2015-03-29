@@ -15,6 +15,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ExpandableListView;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.unnamed.b.atv.model.TreeNode;
 
@@ -51,7 +52,6 @@ public class MainActivity  extends ActionBarActivity { //extends Activity{
         final AlertDialog ad = new AlertDialog.Builder(this).create();
         final Activity activityObj = this;
         MainContext = activityObj;
-
         //Put list into string list
         final List<String> list = new ArrayList(listItems.keySet());
 
@@ -62,6 +62,7 @@ public class MainActivity  extends ActionBarActivity { //extends Activity{
         final SimpleArrayAdapter adapter = new SimpleArrayAdapter(this, list);
         //Sets Adapter
         listview.setAdapter(adapter);
+
         //Onclick of List view
         listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                                             //btn.setOnClickListener(new View.OnClickListener() {
@@ -232,11 +233,31 @@ public  void StartServiceThreadforHierarchy(String param)
     //After valid population of both the variables, thread will come out of sleep mode
 
     ServiceCallThread.Hierarchy = "START";
+
     ServiceCallThread sthread = new ServiceCallThread(param);
     try {
         sthread.join();
         sthread.start();
         while (ServiceCallThread.Hierarchy == "START") {
+            try {
+                Thread.sleep(10);
+            } catch (Exception ex) {
+                throw new Exception(ex.getMessage());
+            }
+        }
+    } catch (Exception e) {
+
+    }
+}
+public void StartServiceThreadForUserQuery(String query)
+{
+    ServiceCallThread.UserQueryResponse = "START";
+
+    ServiceCallThread sthread = new ServiceCallThread(query);
+    try {
+        sthread.join();
+        sthread.start();
+        while (ServiceCallThread.UserQueryResponse == "START") {
             try {
                 Thread.sleep(10);
             } catch (Exception ex) {

@@ -6,6 +6,7 @@ package com.example.kheyalimitra.mywebserviceapi;
 
 import android.app.Fragment;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.provider.Contacts;
 import android.provider.Settings;
@@ -30,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 public class DimensionTree extends Fragment{
 
@@ -40,6 +42,7 @@ public class DimensionTree extends Fragment{
     private int listMenuPos_Dimen = 0;
     private int listMenuPos_Mes = 0;
     private List<String> queryList ;
+    public static Map<String,String>QueryResponse;
     private ArrayList<String> SelectedDimensions;
     private ArrayList<String> SelectedMeasures;
     private class SimpleArrayAdapter extends ArrayAdapter<String> {
@@ -62,28 +65,35 @@ public class DimensionTree extends Fragment{
     private TreeNode.TreeNodeClickListener nodeClickListener = new TreeNode.TreeNodeClickListener() {
         @Override
         public void onClick(TreeNode node, Object value) {
+            MainActivity main =  new MainActivity();
             try {
 
-                MainActivity main =  new MainActivity();
+
                 String child = (String) node.getValue();
                 TreeNode n = node.getRoot();
+                List<TreeNode> c=  n.getChildren();
                 TreeNode p = node.getParent();
+                TreeNode grandP = p.getParent();
                 String root = (String)n.getValue();
                 String parentNode = (String) p.getValue();
+                String grandParentNode="";
+                if(grandP !=null)
+                    grandParentNode= (String)grandP.getValue();
                 String param="";
                 if(root.equals("D Root")) {
-                    dimNode.setText("Selected: " + "." + parentNode + "." + child);
+
+                    dimNode.setText("Selected: "+grandParentNode + "." + parentNode + "." + child);
 
                     if( !parentNode.equals("Dimension/Hierarchy:")&& !parentNode.equals("D Root")) {// if reparation is ro be avoided for multiple service call use (level==3 && node.getChildren().size()<1))
                         param=parentNode+"."+child;
-                        if(root.equals("D Root")) {
-                            SelectedDimensions.add(parentNode + "." + child);
+                        if(grandParentNode.equals("D Root")) {
+                            SelectedDimensions.add( child);
                         }
                             else {
-                                if(parentNode.equals("D Root"))
-                                    SelectedDimensions.add( child);
+                                if(grandParentNode.equals("Dimension/Hierarchy:"))
+                                    SelectedDimensions.add(parentNode + "." + child);
                             else
-                                    SelectedDimensions.add(root+"."+parentNode + "." + child);
+                                    SelectedDimensions.add(grandParentNode+"."+parentNode + "." + child);
                             }
 
                         main.StartServiceThreadforHierarchy(param);
@@ -179,6 +189,7 @@ public class DimensionTree extends Fragment{
                     List<String> list = new ArrayList(listItems.values());
                     listMenuPos_Mes = list.lastIndexOf("Selected Measures are given below:");
                     listMenuPos_Dimen = list.lastIndexOf("Selected Dimensions are given below:");
+                    queryList = list;
                     SimpleArrayAdapter adapter = new SimpleArrayAdapter(MainActivity.MainContext, list);
                     //Sets Adapter
                     selectedQuery.setAdapter(adapter);
@@ -257,6 +268,19 @@ public class DimensionTree extends Fragment{
                     }
                     int commaPos = query.lastIndexOf(",");
                     query = query.substring(0,commaPos)+"\n";
+                    MainActivity main = new MainActivity();
+                    try {
+                        main.StartServiceThreadForUserQuery(query);
+                        ParseJSONResponse parse = new ParseJSONResponse();
+                        QueryResponse = parse.ParseUserQuery(ServiceCallThread.UserQueryResponse);
+                        GoogleImageGraphActivity gIGA =  new GoogleImageGraphActivity();
+                        Intent intent = new Intent(MainActivity.MainContext, GoogleImageGraphActivity.class);
+                        DimensionTree.this.startActivity(intent);
+                    }
+                    catch (Exception e)
+                    {
+                        String s =e.getMessage();
+                    }
                 }
 
 
@@ -276,8 +300,6 @@ public class DimensionTree extends Fragment{
             tView = new AndroidTreeView(getActivity(), root);
             tView.setDefaultAnimation(true);
             tView.setDefaultContainerStyle(R.style.TreeNodeStyleCustom);
-
-            //tView.setDefaultViewHolder(IconTreeItemHolder.class);
             tView.setDefaultNodeClickListener(nodeClickListener);
             containerView.addView(tView.getView());
             tView.collapseAll();

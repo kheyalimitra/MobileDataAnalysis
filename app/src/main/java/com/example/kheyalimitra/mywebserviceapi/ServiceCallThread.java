@@ -10,6 +10,7 @@ public class ServiceCallThread extends  Thread{
     public static String Domains;
     public static String Measures;
     public static String Hierarchy;
+    public static String UserQueryResponse;
     boolean isHierarchyCall = false;
     public  String Parameter;
     public ServiceCallThread(String param)
@@ -34,8 +35,18 @@ public class ServiceCallThread extends  Thread{
         else
       {
           try {
-              String res_Hier = cs.CallMetaData2(Parameter);
-              Hierarchy = res_Hier;
+              // this is call to user query
+              if(Parameter.contains("on columns"))
+              {
+                  UserQueryResponse =  cs.CallFetchDataFromAdventureWorks(Parameter);
+
+              }
+              else {
+                  // this is the call to generate deep level hierarchy
+                    String res_Hier = cs.CallMetaData2(Parameter);
+                    Hierarchy = res_Hier;
+              }
+
           }
           catch (Exception e)
           {

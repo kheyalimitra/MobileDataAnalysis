@@ -91,9 +91,25 @@ public class ParseJSONResponse {
 
         return  AdventureWorksHierarchyDetails;
     }
-    public ArrayList<String> ParseUserQuery(String query)
+    public Map<String,String> ParseUserQuery(String response)
     {
-        AdventureWorksAnalysisResponse =  new ArrayList<String>();
+        Map<String,String>AdventureWorksAnalysisResponse =  new LinkedHashMap<String,String>();
+        try {
+            JSONParser parser = new JSONParser();
+            Object obj = parser.parse(response);
+            AdventureWorksAnalysisResponse = (Map<String,String>)obj;
+            /*Iterator it = responseDetails.entrySet().iterator();
+            String res="";
+            while (it.hasNext()) {
+                Map.Entry pair = (Map.Entry)it.next();
+                res+=pair.getKey()+":" +pair.getValue();
+                it.remove();
+            }*/
+        }
+        catch (Exception e)
+        {
+
+        }
 
         return  AdventureWorksAnalysisResponse;
 

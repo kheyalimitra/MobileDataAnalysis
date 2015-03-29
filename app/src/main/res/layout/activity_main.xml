@@ -10,15 +10,39 @@
     android:id="@+id/listview"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_below="@+id/Heading" />
-<TextView
-android:background="@android:color/holo_blue_dark"
-    android:textSize="16sp"
-    android:id="@+id/Heading"
-    android:layout_alignParentTop="true"
-android:layout_width="wrap_content"
-android:layout_height="wrap_content"
-android:text="Server:[webolap], Catalog: [Adventure Works DW 2008R2], Cube: [Adventure Works]"
-    android:layout_alignParentLeft="true"
-    android:layout_alignParentStart="true" />
+    android:layout_below="@+id/CatalogName"
+    android:layout_marginTop="30dp"
+    />
+    <TextView
+
+        android:textSize="14sp"
+        android:id="@+id/ServerName"
+        android:layout_alignParentTop="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Server Name: Webolap.cmpt.sfu.ca"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" android:layout_marginTop="10dp"/>
+    <TextView
+
+        android:textSize="14sp"
+        android:id="@+id/CatalogName"
+        android:layout_below="@+id/ServerName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Catalog: Adventure Works DW 2008R2"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" android:layout_marginTop="10dp" />
+    <TextView
+
+        android:textSize="14sp"
+        android:id="@+id/cubeName"
+        android:layout_below="@+id/CatalogName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Cube: Adventure Works"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" android:layout_marginTop="10dp" />
+
+
     </RelativeLayout>
