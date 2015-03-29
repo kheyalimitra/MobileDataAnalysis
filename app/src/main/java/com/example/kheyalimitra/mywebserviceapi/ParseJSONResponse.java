@@ -18,7 +18,7 @@ public class ParseJSONResponse {
     //Measure details
     public ArrayList<String> AdventureWorksMeasureDetails ;
     public ArrayList<String> AdventureWorksHierarchyDetails ;
-
+    public ArrayList<String> AdventureWorksAnalysisResponse;
     /***
      * Parse JSON response for domains
      * @param domains
@@ -90,6 +90,13 @@ public class ParseJSONResponse {
         Collections.sort(AdventureWorksHierarchyDetails);
 
         return  AdventureWorksHierarchyDetails;
+    }
+    public ArrayList<String> ParseUserQuery(String query)
+    {
+        AdventureWorksAnalysisResponse =  new ArrayList<String>();
+
+        return  AdventureWorksAnalysisResponse;
+
     }
 
 }

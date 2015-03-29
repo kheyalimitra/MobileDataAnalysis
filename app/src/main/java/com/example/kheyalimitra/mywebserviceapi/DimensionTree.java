@@ -37,7 +37,9 @@ public class DimensionTree extends Fragment{
     private TextView mesNode;
     private  AndroidTreeView mView;
     private AndroidTreeView tView;
-    private int counter = 0;
+    private int listMenuPos_Dimen = 0;
+    private int listMenuPos_Mes = 0;
+    private List<String> queryList ;
     private ArrayList<String> SelectedDimensions;
     private ArrayList<String> SelectedMeasures;
     private class SimpleArrayAdapter extends ArrayAdapter<String> {
@@ -45,6 +47,13 @@ public class DimensionTree extends Fragment{
             super(context, android.R.layout.simple_list_item_1, objects);
         }
 
+        @Override
+        public boolean isEnabled(int position) {
+            if(position == listMenuPos_Dimen || position == listMenuPos_Mes) {
+                return false;
+            }
+            return true;
+        }
         @Override
         public long getItemId(int position) {
             return position;
@@ -67,7 +76,16 @@ public class DimensionTree extends Fragment{
 
                     if( !parentNode.equals("Dimension/Hierarchy:")&& !parentNode.equals("D Root")) {// if reparation is ro be avoided for multiple service call use (level==3 && node.getChildren().size()<1))
                         param=parentNode+"."+child;
-                        SelectedDimensions.add(parentNode+"."+child);
+                        if(root.equals("D Root")) {
+                            SelectedDimensions.add(parentNode + "." + child);
+                        }
+                            else {
+                                if(parentNode.equals("D Root"))
+                                    SelectedDimensions.add( child);
+                            else
+                                    SelectedDimensions.add(root+"."+parentNode + "." + child);
+                            }
+
                         main.StartServiceThreadforHierarchy(param);
                         ParseJSONResponse parse = new ParseJSONResponse();
                         ArrayList<String> AdventureWorksHierarchyDetails = parse.ParseHierarchy(ServiceCallThread.Hierarchy);
@@ -92,7 +110,7 @@ public class DimensionTree extends Fragment{
                     if(root.equals("M Root"))
                     {
                         mesNode.setText("Selected: " + child);
-                        if(!child.equals("Measures:") && child.equals("M Root") )
+                        if(!child.equals("Measures:") && !child.equals("M Root") )
                         SelectedMeasures.add(child);
                     }
 
@@ -120,7 +138,7 @@ public class DimensionTree extends Fragment{
         MainActivity main = new MainActivity();
         //Start Service Thread
         main.StartServiceThread();
-        final LayoutInflater innerInfl = inflater;
+
         //Get All layout from treeview.xml
         View rootView = inflater.inflate(R.layout.treeview, null, false);
         final ViewGroup containerView = (ViewGroup) rootView.findViewById(R.id.DimensionListView);
@@ -135,6 +153,7 @@ public class DimensionTree extends Fragment{
         selectedQuery.setVisibility(View.INVISIBLE);
         finalSelection.setVisibility(View.INVISIBLE);
         try {
+
             View.OnClickListener buttonListener = new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -146,31 +165,44 @@ public class DimensionTree extends Fragment{
                     selectedQuery.setVisibility(View.VISIBLE);
                     finalSelection.setVisibility(View.VISIBLE);
                     final LinkedHashMap<String, String> listItems = new LinkedHashMap<>();
-                    listItems.put("First","Selected Dimensions are given below");
+
+                    listItems.put("First","Selected Dimensions are given below:");
+
                     for( int i=0;i<SelectedDimensions.size();i++) {
-                        listItems.put("Selected Dimensions "+i+1, SelectedDimensions.get(i));
+                        listItems.put(SelectedDimensions.get(i), SelectedDimensions.get(i));
                     }
+
                     listItems.put("Second","Selected Measures are given below:");
+
                     for( int i=0;i<SelectedMeasures.size();i++)
-                        listItems.put("Selected Measures"+i+1, SelectedMeasures.get(i));
+                        listItems.put(SelectedMeasures.get(i), SelectedMeasures.get(i));
                     List<String> list = new ArrayList(listItems.values());
+                    listMenuPos_Mes = list.lastIndexOf("Selected Measures are given below:");
+                    listMenuPos_Dimen = list.lastIndexOf("Selected Dimensions are given below:");
                     SimpleArrayAdapter adapter = new SimpleArrayAdapter(MainActivity.MainContext, list);
                     //Sets Adapter
                     selectedQuery.setAdapter(adapter);
 
                     //Onclick of List view
                     selectedQuery.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
                                                                @Override
 
                                                                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                                                                    try {
-                                                                       ///
+                                                                       queryList=null;
                                                                        int i= position;
                                                                        String itemSelected = (String) (selectedQuery.getItemAtPosition(position));
-                                                                       Toast.makeText(MainActivity.MainContext, itemSelected, Toast.LENGTH_SHORT).show();
-                                                                       //listItems.remove(position);
-                                                                       execBtn.setText("Clicked!");
-
+                                                                       listItems.remove(itemSelected);
+                                                                       List<String> l = new ArrayList(listItems.values());
+                                                                       queryList=l;
+                                                                       // set both the items non clickable using adapter
+                                                                       listMenuPos_Mes = l.lastIndexOf("Selected Measures are given below:");
+                                                                       listMenuPos_Dimen = l.lastIndexOf("Selected Dimensions are given below:");
+                                                                       SimpleArrayAdapter a = new SimpleArrayAdapter(MainActivity.MainContext, l);
+                                                                       //Sets Adapter
+                                                                       selectedQuery.setAdapter(a);
+                                                                       Toast.makeText(MainActivity.MainContext, itemSelected+"is removed.", Toast.LENGTH_LONG).show();
                                                                    } catch (Exception e) {
 
                                                                    }
@@ -182,6 +214,54 @@ public class DimensionTree extends Fragment{
 
             };
             analyzeBtn.setOnClickListener(buttonListener);
+            View.OnClickListener executeListener = new View.OnClickListener()
+            {
+                @Override
+                public void onClick(View v) {
+                    boolean whereClause =false;
+                    String query="Select\n" +
+                            "{\n" ;
+                    for(int i=0;i<queryList.size();i++) {
+                        if(!queryList.get(i).equals("Selected Dimensions are given below:")) {
+                            if( !whereClause &&!queryList.get(i).equals("Selected Measures are given below:")) {
+                                int pos = queryList.get(i).indexOf(".");
+                                String firstPart = queryList.get(i).substring(0,pos);
+                                String secondPart = queryList.get(i).substring(pos+1);
+                                query += "["+firstPart + "].[";
+                                String rest;
+                                if(secondPart.contains("."))
+                                {
+                                    pos = secondPart.indexOf(".");
+                                    rest = secondPart.substring(pos+1);
+                                    secondPart = secondPart.substring(0,pos);
+                                    query += secondPart +"].["+rest+" ],\n";
+                                }
+                                else
+                                    query += secondPart +"],\n";
+
+                            }
+                            else
+                            {
+                                if(queryList.get(i).equals("Selected Measures are given below:")) {
+                                    whereClause=true;
+                                    int commaPos = query.lastIndexOf(",");
+                                    query = query.substring(0,commaPos)+"\n";
+                                    query += "} on columns\n" +
+                                            "from [adventure works]\n" +
+                                            "where\n";
+                                }
+                                else
+                                    query += "[measures].["+ queryList.get(i)+"],\n";
+                            }
+                        }
+                    }
+                    int commaPos = query.lastIndexOf(",");
+                    query = query.substring(0,commaPos)+"\n";
+                }
+
+
+            };
+            execBtn.setOnClickListener(executeListener);
             //Parse Domain List
             main.AdventureWorksDomainDetails = parse.ParseDomainRecords(ServiceCallThread.Domains);
             //Parse Measure LIst
