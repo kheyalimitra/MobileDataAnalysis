@@ -20,10 +20,12 @@ import android.widget.TextView;
 import com.unnamed.b.atv.model.TreeNode;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 
 public class MainActivity  extends ActionBarActivity { //extends Activity{
@@ -125,14 +127,16 @@ public class MainActivity  extends ActionBarActivity { //extends Activity{
 
         try {
 
-            ArrayList<String> list = new ArrayList<String>();
-            Map<String, List<String>> domainDetails = AdventureWorksDomainDetails;
-            /// populate tree nodes
-            Iterator it = AdventureWorksDomainDetails.entrySet().iterator();
+            ArrayList<String> outerList = new ArrayList<String>();
+            /// sort map table using treemap
+            Map<String, List<String>> treeMap = new TreeMap<String, List<String>>(AdventureWorksDomainDetails);
+
+            Iterator it = treeMap.entrySet().iterator();
             while (it.hasNext()) {
                 Map.Entry pair = (Map.Entry) it.next();
                 TreeNode t = new TreeNode(pair.getKey());
-                if (AdventureWorksDomainDetails.get(pair.getKey()).size() > 1) {
+                outerList.add((String)pair.getKey());
+                if (treeMap.get(pair.getKey()).size() > 1) {
                     List<String> innerchild = (List<String>) pair.getValue();
                     Iterator inner = innerchild.iterator();
                     while (inner.hasNext()) {
@@ -147,6 +151,7 @@ public class MainActivity  extends ActionBarActivity { //extends Activity{
 
                     }
                 }
+
                 dRoot.addChild(t);
             }
 
@@ -160,9 +165,12 @@ public class MainActivity  extends ActionBarActivity { //extends Activity{
     public TreeNode PopulateMeasures() {
         TreeNode mRoot = new TreeNode("Measures:");
         TreeNode mesRoot = new TreeNode("M Root");
+         List<String> mesList = AdventureWorksMeasureDetails;
+        //sort tree.
+        Collections.sort(mesList);
         try {
 
-            Iterator itr = AdventureWorksMeasureDetails.iterator();
+            Iterator itr = mesList.iterator();
             while (itr.hasNext()) {
                 String key = (String) itr.next();
                 TreeNode t = new TreeNode(key);

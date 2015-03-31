@@ -36,7 +36,7 @@ public class ServiceCallThread extends  Thread{
       {
           try {
               // this is call to user query
-              if(Parameter.contains("on columns"))
+              if(Parameter.toUpperCase().contains("FROM [ADVENTURE WORKS]"))
               {
                   UserQueryResponse =  cs.CallFetchDataFromAdventureWorks(Parameter);
 
@@ -50,7 +50,7 @@ public class ServiceCallThread extends  Thread{
           }
           catch (Exception e)
           {
-
+            String s = e.getMessage();
           }
       }
     }

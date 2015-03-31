@@ -4,65 +4,24 @@
     android:layout_height="match_parent"
     android:orientation="vertical" >
 
-    <TextView
-        android:id="@+id/TableViewText"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@android:color/holo_blue_dark"
-        android:padding="2dp"
-        android:layout_below="@+id/executeButton"
-        android:text="Tabular Representation:"
-        android:textSize="14sp" />
-
-    <RelativeLayout
-        android:id="@+id/TableView"
-        android:layout_width="match_parent"
-        android:layout_height="150dp"
-        android:layout_below="@id/TableViewText">
-        <TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:stretchColumns="1"
-            android:id="@+id/TableData">
-            <View
-                android:layout_height="2dip"
-                android:background="#FF909090" />
-
-            <TableRow   android:id="@+id/tableRow1"
-                android:layout_height="wrap_content"
-                android:layout_width="match_parent"
-                android:layout_marginLeft="@dimen/abc_action_bar_default_padding_material">
-
-            </TableRow>
-            <TableRow  android:id="@+id/tableRow2"
-                android:layout_height="wrap_content"
-                android:layout_width="match_parent"
-                android:layout_below="@+id/tableRow1"
-                android:layout_marginLeft="@dimen/abc_action_bar_default_padding_material">
-
-            </TableRow>
-        </TableLayout>
-
-    </RelativeLayout>
-    <TextView
+        <TextView
         android:id="@+id/graphicalView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@android:color/holo_blue_dark"
         android:padding="2dp"
-        android:layout_below="@+id/TableData"
         android:text="Graphical Representation:"
         android:textSize="14sp" />
     <WebView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/TableView"
+        android:layout_height="400dp"
+        android:layout_alignParentTop="true"
         android:id="@+id/graphView"
         android:layout_marginLeft="@dimen/abc_action_bar_default_padding_material"/>
     <WebView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/TableView"
-        android:id="@+id/graphViewBar"
+        android:layout_height="150dp"
+        android:layout_below="@+id/graphicalView"
+        android:id="@+id/webTableView"
         android:layout_marginLeft="@dimen/abc_action_bar_default_padding_material"/>
 </LinearLayout>

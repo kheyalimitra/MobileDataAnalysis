@@ -1,5 +1,7 @@
 package com.example.kheyalimitra.mywebserviceapi;
 
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import java.util.ArrayList;
@@ -8,6 +10,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.StringTokenizer;
 
 /**
  * Created by KheyaliMitra on 3/22/2015.
@@ -91,24 +94,26 @@ public class ParseJSONResponse {
 
         return  AdventureWorksHierarchyDetails;
     }
-    public Map<String,String> ParseUserQuery(String response)
+    public List<Map<String,String>> ParseUserQuery(String response)
     {
-        Map<String,String>AdventureWorksAnalysisResponse =  new LinkedHashMap<String,String>();
+        List<Map<String,String>>AdventureWorksAnalysisResponse =  new ArrayList<Map<String,String>>();
+        Map<String, String> innerMap ;
         try {
             JSONParser parser = new JSONParser();
             Object obj = parser.parse(response);
-            AdventureWorksAnalysisResponse = (Map<String,String>)obj;
-            /*Iterator it = responseDetails.entrySet().iterator();
-            String res="";
-            while (it.hasNext()) {
-                Map.Entry pair = (Map.Entry)it.next();
-                res+=pair.getKey()+":" +pair.getValue();
-                it.remove();
-            }*/
+            JSONArray responseArray = (JSONArray)obj;
+            for( int i=0;i<responseArray.size();i++)
+            {
+                innerMap =  new LinkedHashMap<String,String>();
+                JSONObject o =(JSONObject) responseArray.get(i);
+                innerMap = (Map<String,String>)o;
+                AdventureWorksAnalysisResponse.add(innerMap);
+            }
+
         }
         catch (Exception e)
         {
-
+            String s = e.getMessage();
         }
 
         return  AdventureWorksAnalysisResponse;

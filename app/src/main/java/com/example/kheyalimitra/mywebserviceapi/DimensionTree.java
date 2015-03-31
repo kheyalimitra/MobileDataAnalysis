@@ -42,7 +42,7 @@ public class DimensionTree extends Fragment{
     private int listMenuPos_Dimen = 0;
     private int listMenuPos_Mes = 0;
     private List<String> queryList ;
-    public static Map<String,String>QueryResponse;
+    public static List<Map<String,String>>QueryResponse;
     private ArrayList<String> SelectedDimensions;
     private ArrayList<String> SelectedMeasures;
     private class SimpleArrayAdapter extends ArrayAdapter<String> {
@@ -67,11 +67,8 @@ public class DimensionTree extends Fragment{
         public void onClick(TreeNode node, Object value) {
             MainActivity main =  new MainActivity();
             try {
-
-
                 String child = (String) node.getValue();
                 TreeNode n = node.getRoot();
-                List<TreeNode> c=  n.getChildren();
                 TreeNode p = node.getParent();
                 TreeNode grandP = p.getParent();
                 String root = (String)n.getValue();
@@ -95,22 +92,24 @@ public class DimensionTree extends Fragment{
                             else
                                     SelectedDimensions.add(grandParentNode+"."+parentNode + "." + child);
                             }
+                        List<TreeNode> children = node.getChildren();
+                        if(children.size()==0 && node.getLevel()==3) {
+                            main.StartServiceThreadforHierarchy(param);
+                            ParseJSONResponse parse = new ParseJSONResponse();
+                            ArrayList<String> AdventureWorksHierarchyDetails = parse.ParseHierarchy(ServiceCallThread.Hierarchy);
+                            try {
 
-                        main.StartServiceThreadforHierarchy(param);
-                        ParseJSONResponse parse = new ParseJSONResponse();
-                        ArrayList<String> AdventureWorksHierarchyDetails = parse.ParseHierarchy(ServiceCallThread.Hierarchy);
-                        try {
+                                Iterator itr = AdventureWorksHierarchyDetails.iterator();
+                                while (itr.hasNext()) {
+                                    String key = (String) itr.next();
+                                    TreeNode t = new TreeNode(key);
+                                    node.addChild(t);
+                                }
+                            } catch (Exception e)
 
-                            Iterator itr = AdventureWorksHierarchyDetails.iterator();
-                            while (itr.hasNext()) {
-                                String key = (String) itr.next();
-                                TreeNode t = new TreeNode(key);
-                                node.addChild(t);
+                            {
+
                             }
-                          } catch (Exception e)
-
-                        {
-
                         }
                     }
 
@@ -230,57 +229,66 @@ public class DimensionTree extends Fragment{
                 @Override
                 public void onClick(View v) {
                     boolean whereClause =false;
-                    String query="Select\n" +
-                            "{\n" ;
-                    for(int i=0;i<queryList.size();i++) {
-                        if(!queryList.get(i).equals("Selected Dimensions are given below:")) {
-                            if( !whereClause &&!queryList.get(i).equals("Selected Measures are given below:")) {
-                                int pos = queryList.get(i).indexOf(".");
-                                String firstPart = queryList.get(i).substring(0,pos);
-                                String secondPart = queryList.get(i).substring(pos+1);
-                                query += "["+firstPart + "].[";
-                                String rest;
-                                if(secondPart.contains("."))
-                                {
-                                    pos = secondPart.indexOf(".");
-                                    rest = secondPart.substring(pos+1);
-                                    secondPart = secondPart.substring(0,pos);
-                                    query += secondPart +"].["+rest+" ],\n";
-                                }
-                                else
-                                    query += secondPart +"],\n";
+                    int axisCount=0;
+                    if(queryList.size()<= 5) {
+                        String query = "Select\n" ;
+                        for (int i = 0; i < queryList.size(); i++) {
+                            if (!queryList.get(i).equals("Selected Dimensions are given below:")) {
+                                if (!whereClause && !queryList.get(i).equals("Selected Measures are given below:")) {
+                                    if (axisCount < 2) {
+                                        int pos = queryList.get(i).indexOf(".");
+                                        String firstPart = queryList.get(i).substring(0, pos);
+                                        String secondPart = queryList.get(i).substring(pos + 1);
+                                        query += "{[" + firstPart + "].[";
+                                        String rest;
+                                        if (secondPart.contains(".")) {
+                                            pos = secondPart.indexOf(".");
+                                            rest = secondPart.substring(pos + 1);
+                                            secondPart = secondPart.substring(0, pos);
+                                            query += secondPart + "].[" + rest + "].children} ON " + axisCount++ + ",\n";
+                                        } else
+                                            query += secondPart + "].children} ON " + axisCount++ + "\n";
+                                    }
 
-                            }
-                            else
-                            {
-                                if(queryList.get(i).equals("Selected Measures are given below:")) {
-                                    whereClause=true;
-                                    int commaPos = query.lastIndexOf(",");
-                                    query = query.substring(0,commaPos)+"\n";
-                                    query += "} on columns\n" +
-                                            "from [adventure works]\n" +
-                                            "where\n";
+                                } else {
+                                    if (queryList.get(i).equals("Selected Measures are given below:")) {
+                                        whereClause = true;
+                                        int commaPos = query.lastIndexOf(",");
+                                        query = query.substring(0, commaPos) + "\n";
+                                        query += " \n" +
+                                                "from [adventure works]\n" +
+                                                "where\n";
+                                    } else
+                                        query += "[measures].[" + queryList.get(i) + "]\n";
                                 }
-                                else
-                                    query += "[measures].["+ queryList.get(i)+"],\n";
                             }
                         }
+                        // check if query string is containg atleast 1 dimension and 1 measure
+                        if(query.contains("measures")&& query.contains("ON ")) {
+                            //int commaPos = query.lastIndexOf(",");
+                            //query = query.substring(0, commaPos) + "\n";
+                            MainActivity main = new MainActivity();
+                            try {
+                                main.StartServiceThreadForUserQuery(query);
+                                //ParseJSONResponse parse = new ParseJSONResponse();
+                                //QueryResponse = parse.ParseUserQuery(ServiceCallThread.UserQueryResponse);
+                                GoogleImageGraphActivity gIGA = new GoogleImageGraphActivity();
+                                Intent intent = new Intent(MainActivity.MainContext, GoogleImageGraphActivity.class);
+                                DimensionTree.this.startActivity(intent);
+                            } catch (Exception e) {
+                                String s = e.getMessage();
+                            }
+                        }
+                        else
+                        {
+                            Toast.makeText(MainActivity.MainContext, "At least 1 dimension and 1 measure must be selected. Please retry.", Toast.LENGTH_LONG).show();
+                        }
                     }
-                    int commaPos = query.lastIndexOf(",");
-                    query = query.substring(0,commaPos)+"\n";
-                    MainActivity main = new MainActivity();
-                    try {
-                        main.StartServiceThreadForUserQuery(query);
-                        ParseJSONResponse parse = new ParseJSONResponse();
-                        QueryResponse = parse.ParseUserQuery(ServiceCallThread.UserQueryResponse);
-                        GoogleImageGraphActivity gIGA =  new GoogleImageGraphActivity();
-                        Intent intent = new Intent(MainActivity.MainContext, GoogleImageGraphActivity.class);
-                        DimensionTree.this.startActivity(intent);
-                    }
-                    catch (Exception e)
+                    else
                     {
-                        String s =e.getMessage();
+                        Toast.makeText(MainActivity.MainContext, "At most 2 dimensions and 1 measure can be selected. Please retry.", Toast.LENGTH_LONG).show();
                     }
+
                 }
 
 
@@ -342,7 +350,7 @@ private  void _processselectedquery(LayoutInflater inflater, final ViewGroup con
     listItems.put("Selected Dimensions", SelectedDimensions);
     listItems.put("Selected Measures", SelectedMeasures);
     final List<String> list = new ArrayList(listItems.keySet());
-    final TextView tv = (TextView)rootView.findViewById(R.id.TableViewText);
+   // final TextView tv = (TextView)rootView.findViewById(R.id.TableViewText);
     ListView selectedQueries = (ListView) rootView.findViewById(R.id.queryView);
     final SimpleArrayAdapter adapter = new SimpleArrayAdapter(MainActivity.MainContext, list);
     //Sets Adapter
@@ -355,7 +363,7 @@ private  void _processselectedquery(LayoutInflater inflater, final ViewGroup con
                                                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                                                    try {
                                                         ///
-                                                        tv.setText("Clicked!");
+     //                                                   tv.setText("Clicked!");
 
                                                    } catch (Exception e) {
 
